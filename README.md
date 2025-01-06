@@ -67,22 +67,32 @@ contract Counter {
 
 Update hardhat.config.ts:
 ```typescript
+// hardhat.config.ts
 import { HardhatUserConfig } from "hardhat/config";
 import "@nomicfoundation/hardhat-toolbox";
 
 const config: HardhatUserConfig = {
   solidity: "0.8.24",
   networks: {
+    // Built-in hardhat network
     hardhat: {
       chainId: 1337
+    },
+    // Local network when you run `npx hardhat node`
+    localhost: {
+      url: "http://127.0.0.1:8545"
     }
   },
   paths: {
-    artifacts: "../frontend/src/artifacts"
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
   }
 };
 
 export default config;
+
 ```
 
 Create deploy script in scripts/deploy.ts:
@@ -109,7 +119,7 @@ main()
 
 ```bash
 cd ..
-npm create vite@latest frontend -- --template react-ts
+npm create vite@5 frontend -- --template react-ts
 cd frontend
 npm install
 npm install ethers@6.8.1
@@ -124,11 +134,11 @@ Create Counter component in src/components/Counter.tsx:
 ```typescript
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
-import CounterArtifact from '../artifacts/contracts/Counter.sol/Counter.json'
+import CounterArtifact from '../../../smart-contracts/artifacts/contracts/Counter.sol/Counter.json'
 
 const COUNTER_ADDRESS = import.meta.env.VITE_CONTRACT_ADDRESS
 
-export function Counter() {
+const Counter = () => {
   const [count, setCount] = useState<number>(0)
   const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [error, setError] = useState<string>('')
@@ -219,11 +229,13 @@ export function Counter() {
     </div>
   )
 }
+
+export default Counter
 ```
 
 Update src/App.tsx:
 ```typescript
-import { Counter } from './components/Counter'
+import Counter from './components/Counter'
 
 function App() {
   return (
